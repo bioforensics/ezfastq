@@ -1,0 +1,6 @@
+[report]
+show_missing = True
+
+[run]
+branch = True
+omit = */fq/*/__init__.py, */fq/tests/*.py
