@@ -9,6 +9,7 @@
 
 from .fastq import FastqFile
 from .map import SampleFastqMap
+from .pair import PairMode
 from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
@@ -41,10 +42,10 @@ class FastqCopier:
     prefix: str = ""
 
     @classmethod
-    def from_dir(cls, sample_names, data_path, prefix="", paired=True):
+    def from_dir(cls, sample_names, data_path, prefix="", pair_mode=PairMode.Unspecified):
         copied_files = list()
         skipped_files = list()
-        file_map = SampleFastqMap.new(sample_names, data_path, reads_are_paired=paired)
+        file_map = SampleFastqMap.new(sample_names, data_path, pair_mode=pair_mode)
         copier = cls(sorted(sample_names), copied_files, skipped_files, file_map, prefix)
         return copier
 
@@ -103,7 +104,8 @@ class FastqCopier:
         for sample_name, fqfiles in sorted(self.file_map.items()):
             for n, fqfile in enumerate(fqfiles, 1):
                 source_path = Path(fqfile).absolute()
-                yield FastqFile(source_path, sample_name, n, self.prefix)
+                read = 0 if len(fqfiles) == 1 else n
+                yield FastqFile(source_path, sample_name, read, self.prefix)
 
     def __str__(self):
         output = StringIO()

@@ -8,11 +8,12 @@
 # -------------------------------------------------------------------------------------------------
 
 from .copier import FastqCopier
+from .pair import PairMode
 from pathlib import Path
 
 
-def copy(sample_names, seq_path, prefix="", workdir=Path(".")):
-    copier = FastqCopier.from_dir(sample_names, seq_path, prefix=prefix, paired=True)
+def copy(sample_names, seq_path, pair_mode=PairMode.Unspecified, prefix="", workdir=Path(".")):
+    copier = FastqCopier.from_dir(sample_names, seq_path, prefix=prefix, pair_mode=pair_mode)
     copier.copy_files(workdir / "seq")
     copier.print_copy_log()
     nlogs = len(list((workdir / "seq").glob("copy-log-*.toml")))

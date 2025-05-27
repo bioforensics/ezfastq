@@ -7,6 +7,7 @@
 # Development Center.
 # -------------------------------------------------------------------------------------------------
 
+from .pair import PairMode
 from .scanner import FastqFileScanner
 from collections import defaultdict
 
@@ -15,28 +16,17 @@ class SampleFastqMap(defaultdict):
     "Map sample names to lists of corresponding FASTQ files."
 
     @classmethod
-    def new(cls, sample_names, data_path, reads_are_paired=True):
+    def new(cls, sample_names, data_path, pair_mode=PairMode.Unspecified):
         files_by_sample = cls(list)
         scanner = FastqFileScanner.new(sample_names)
         for sample_name, fastq in scanner.scan(data_path):
             files_by_sample[sample_name].append(fastq)
             files_by_sample[sample_name].sort()
-        cls.validate_sample_files(sample_names, files_by_sample, reads_are_paired=reads_are_paired)
+        cls.validate_sample_files(sample_names, files_by_sample, pair_mode=pair_mode)
         return files_by_sample
 
     @staticmethod
-    def validate_sample_files(sample_names, files_by_sample, reads_are_paired=True):
+    def validate_sample_files(sample_names, files_by_sample, pair_mode=PairMode.Unspecified):
         for sample in sample_names:
-            file_list = files_by_sample[sample]
-            num_files = len(file_list)
-            if num_files == 0:
-                raise FileNotFoundError(f"sample {sample}: found 0 FASTQ files")
-            if reads_are_paired:
-                exp_num_fastq_files = 2
-                mode = "paired"
-            else:
-                exp_num_fastq_files = 1
-                mode = "single"
-            if num_files != exp_num_fastq_files:
-                message = f"sample {sample}: found {num_files} FASTQ files, expected {exp_num_fastq_files} in {mode}-end mode"
-                raise ValueError(message)
+            fastq_files = files_by_sample[sample]
+            pair_mode.check(len(fastq_files), sample)
