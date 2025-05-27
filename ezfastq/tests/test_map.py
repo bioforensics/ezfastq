@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------------------------
-# Copyright (c) 2025, DHS. This file is part of fq. https://github.com/bioforensics/fq
+# Copyright (c) 2025, DHS. This file is part of ezfastq: https://github.com/bioforensics/ezfastq.
 #
 # This software was prepared for the Department of Homeland Security (DHS) by the Battelle National
 # Biodefense Institute, LLC (BNBI) as part of contract HSHQDC-15-C-00064 to manage and operate the
@@ -7,8 +7,8 @@
 # Development Center.
 # -------------------------------------------------------------------------------------------------
 
-from fq.map import SampleFastqMap
-from fq.pair import PairMode
+from ezfastq.map import SampleFastqMap
+from ezfastq.pair import PairMode
 from importlib.resources import files
 import pytest
 
@@ -65,7 +65,7 @@ def test_missing_dir():
 
 def test_dir_is_file():
     sample_names = [f"sample{n+1}" for n in range(9)]
-    file_path = files("fq") / "tests" / "data" / "flat" / "test2_R1.fq.gz"
+    file_path = files("ezfastq") / "tests" / "data" / "flat" / "test2_R1.fq.gz"
     with pytest.raises(NotADirectoryError):
         SampleFastqMap.new(sample_names, file_path)
 

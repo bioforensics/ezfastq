@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------------------------
-# Copyright (c) 2025, DHS. This file is part of fq. https://github.com/bioforensics/fq
+# Copyright (c) 2025, DHS. This file is part of ezfastq: https://github.com/bioforensics/ezfastq.
 #
 # This software was prepared for the Department of Homeland Security (DHS) by the Battelle National
 # Biodefense Institute, LLC (BNBI) as part of contract HSHQDC-15-C-00064 to manage and operate the
@@ -7,7 +7,7 @@
 # Development Center.
 # -------------------------------------------------------------------------------------------------
 
-from fq.copier import FastqCopier
+from ezfastq.copier import FastqCopier
 from importlib.resources import files
 import pytest
 
@@ -17,8 +17,8 @@ except ModuleNotFoundError:
     import tomli as tomllib
 
 
-SEQ_PATH_1 = files("fq") / "tests" / "data" / "flat"
-SEQ_PATH_2 = files("fq") / "tests" / "data" / "nested"
+SEQ_PATH_1 = files("ezfastq") / "tests" / "data" / "flat"
+SEQ_PATH_2 = files("ezfastq") / "tests" / "data" / "nested"
 
 
 def test_copier_basic():

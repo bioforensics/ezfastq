@@ -3,4 +3,4 @@ show_missing = True
 
 [run]
 branch = True
-omit = */fq/*/__init__.py, */fq/tests/*.py
+omit = */ezfastq/*/__init__.py, */ezfastq/tests/*.py

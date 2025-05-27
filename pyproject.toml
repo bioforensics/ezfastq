@@ -1,5 +1,5 @@
 [project]
-name = "fq"
+name = "ezfastq"
 version = "0.1"
 description = "Scan directories for FASTQ files and associate with sample names"
 readme = "README.md"
@@ -24,4 +24,7 @@ dev = [
 ]
 
 [project.scripts]
-fq = "fq.cli:main"
+ezfastq = "ezfastq.cli:main"
+
+[tool.setuptools]
+packages = ["ezfastq"]

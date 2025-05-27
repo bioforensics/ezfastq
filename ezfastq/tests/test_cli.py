@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------------------------
-# Copyright (c) 2025, DHS. This file is part of fq. https://github.com/bioforensics/fq
+# Copyright (c) 2025, DHS. This file is part of ezfastq: https://github.com/bioforensics/ezfastq.
 #
 # This software was prepared for the Department of Homeland Security (DHS) by the Battelle National
 # Biodefense Institute, LLC (BNBI) as part of contract HSHQDC-15-C-00064 to manage and operate the
@@ -7,7 +7,7 @@
 # Development Center.
 # -------------------------------------------------------------------------------------------------
 
-from fq import cli
+from ezfastq import cli
 from importlib.resources import files
 import pytest
 from subprocess import run
@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 
 
 def test_copy(tmp_path):
-    seq_path = files("fq") / "tests" / "data" / "flat"
+    seq_path = files("ezfastq") / "tests" / "data" / "flat"
     arglist = [seq_path, "test1", "test2", "test3", "--workdir", tmp_path]
     cli.main(arglist)
     assert len(list((tmp_path / "seq").glob("*_R?.fastq.gz"))) == 6
@@ -33,7 +33,7 @@ def test_copy(tmp_path):
 def test_copy_sample_names_file(tmp_path):
     sample_names_file = tmp_path / "sample-names.txt"
     sample_names_file.write_text("test1\ntest3\ntest2\n")
-    seq_path = files("fq") / "tests" / "data" / "nested"
+    seq_path = files("ezfastq") / "tests" / "data" / "nested"
     arglist = [seq_path, sample_names_file, "--workdir", tmp_path]
     cli.main(arglist)
     assert len(list((tmp_path / "seq").glob("*_R?.fastq.gz"))) == 6
@@ -45,7 +45,7 @@ def test_copy_sample_names_file(tmp_path):
 
 
 def test_fq_command(tmp_path):
-    seq_path = files("fq") / "tests" / "data" / "nested"
-    arglist = ["fq", seq_path, "test1", "test2", "test3", "--workdir", tmp_path]
+    seq_path = files("ezfastq") / "tests" / "data" / "nested"
+    arglist = ["ezfastq", seq_path, "test1", "test2", "test3", "--workdir", tmp_path]
     run(arglist)
     assert len(list((tmp_path / "seq").glob("*_R?.fastq.gz"))) == 6

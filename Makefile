@@ -8,15 +8,15 @@ help: Makefile
 
 ## test:        run automated test suite
 test:
-	pytest --cov=fq fq
+	pytest --cov=ezfastq ezfastq
 
 ## style:       check code style vs Black
 style:
-	black --line-length=99 --check $(shell find fq/ -type f -name "*.py")
+	black --line-length=99 --check $(shell find ezfastq/ -type f -name "*.py")
 
 ## format:      autoformat Python code
 format:
-	black --line-length=99 $(shell find fq/ -type f -name "*.py")
+	black --line-length=99 $(shell find ezfastq/ -type f -name "*.py")
 
 ## hooks:       deploy git pre-commit hooks for development
 hooks:
