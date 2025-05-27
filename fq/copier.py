@@ -14,13 +14,16 @@ from io import StringIO
 from pathlib import Path
 import rich
 from rich.panel import Panel
-from rich.pretty import Pretty
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
+from rich.syntax import Syntax
 import sys
-
-try:
-    import tomllib
-except ModuleNotFoundError:
-    import tomli as tomllib
 from typing import List
 
 
@@ -46,18 +49,55 @@ class FastqCopier:
         return copier
 
     def copy_files(self, destination):
-        for fastq in self:
-            was_copied = fastq.check_and_copy(destination)
-            if was_copied:
-                self.copied_files.append(fastq)
-            else:
-                self.skipped_files.append(fastq)
+        progress = self.get_progress_tracker()
+        progress.console.log(f"Copying {len(self)} FASTQ files")
+        with progress:
+            task = progress.add_task("[bold red]Copying...", total=len(self))
+            for fastq in self:
+                # There's an exact, closed-form solution to the problem addressed in the next few
+                # lines that would involve str.format. I also think it would be much more difficult
+                # to interpret that code's intent. -- DSS, 2025-05-27
+                llsn = self.length_longest_sample_name
+                if llsn < 8:
+                    desc = f"[bold red]{fastq.sample:>8s} R{fastq.read}"
+                elif llsn < 12:
+                    desc = f"[bold red]{fastq.sample:>12s} R{fastq.read}"
+                else:
+                    desc = f"[bold red]{fastq.sample:>16s} R{fastq.read}"
+                progress.update(task, description=desc)
+                was_copied = fastq.check_and_copy(destination)
+                progress.update(task, advance=1)
+                if was_copied:
+                    self.copied_files.append(fastq)
+                else:
+                    self.skipped_files.append(fastq)
+            progress.update(task, description="[bold red]Finished!")
+
+    @staticmethod
+    def get_progress_tracker():
+        return Progress(
+            SpinnerColumn(),
+            TextColumn("[bold red]{task.description}", justify="right"),
+            BarColumn(complete_style="green"),
+            TextColumn("[bold red]{task.percentage:>5.1f}%", justify="right"),
+            TextColumn("[yellow]Time elapsed:"),
+            TimeElapsedColumn(),
+            TextColumn("[cyan]Est. time remaining:"),
+            TimeRemainingColumn(compact=True),
+            refresh_per_second=1,
+        )
 
     def print_copy_log(self, outstream=sys.stderr):
-        log_data = tomllib.loads(str(self))
-        pretty = Pretty(log_data)
-        panel = Panel(pretty, expand=False, title="FASTQ Copy Log", title_align="right")
+        syntax = Syntax(str(self), "toml", theme="solarized-dark")
+        panel = Panel(syntax, expand=False, title="FASTQ Copy Log", title_align="right")
         rich.print(panel, file=outstream)
+
+    @property
+    def length_longest_sample_name(self):
+        return max(len(sample) for sample in self.sample_names)
+
+    def __len__(self):
+        return sum(len(fqfiles) for fqfiles in self.file_map.values())
 
     def __iter__(self):
         for sample_name, fqfiles in sorted(self.file_map.items()):
@@ -68,12 +108,12 @@ class FastqCopier:
     def __str__(self):
         output = StringIO()
         if len(self.copied_files) > 0:
-            print("[UpdatedFileNames]", file=output)
+            print("[CopiedFiles]", file=output)
             for fastq in self.copied_files:
                 print(fastq, file=output)
         if len(self.skipped_files) > 0:
-            print("\n[SkippedFileNames]\nalready_processed = [", file=output)
+            print("\n[SkippedFiles]\nalready_copied = [", file=output)
             for fastq in self.skipped_files:
                 print(f'    "{fastq.source_path.name}",', file=output)
             print("]", file=output)
-        return output.getvalue()
+        return output.getvalue().strip()

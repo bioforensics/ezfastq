@@ -26,8 +26,8 @@ def test_copy(tmp_path):
     copy_log = tmp_path / "seq" / "copy-log-1.toml"
     with open(copy_log, "rb") as fh:
         log_data = tomllib.load(fh)
-    assert len(log_data["UpdatedFileNames"]) == 6
-    assert "SkippedFileNames" not in log_data
+    assert len(log_data["CopiedFiles"]) == 6
+    assert "SkippedFiles" not in log_data
 
 
 def test_copy_sample_names_file(tmp_path):
@@ -40,8 +40,8 @@ def test_copy_sample_names_file(tmp_path):
     copy_log = tmp_path / "seq" / "copy-log-1.toml"
     with open(copy_log, "rb") as fh:
         log_data = tomllib.load(fh)
-    assert len(log_data["UpdatedFileNames"]) == 6
-    assert "SkippedFileNames" not in log_data
+    assert len(log_data["CopiedFiles"]) == 6
+    assert "SkippedFiles" not in log_data
 
 
 def test_fq_command(tmp_path):

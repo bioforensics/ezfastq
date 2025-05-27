@@ -70,7 +70,7 @@ def test_copier_str_basic(tmp_path):
     copier.copy_files(tmp_path)
     observed = str(copier)
     expected = """
-[UpdatedFileNames]
+[CopiedFiles]
 "test1_S1_L001_R1_001.fastq.gz" = "test1_R1.fastq.gz"
 "test1_S1_L001_R2_001.fastq.gz" = "test1_R2.fastq.gz"
 "test2_R1.fq.gz" = "test2_R1.fastq.gz"
@@ -95,8 +95,8 @@ def test_copier_str_allskip(tmp_path):
     copier.copy_files(tmp_path)
     observed = str(copier)
     expected = """
-[SkippedFileNames]
-already_processed = [
+[SkippedFiles]
+already_copied = [
     "test1_S1_L001_R1_001.fastq.gz",
     "test1_S1_L001_R2_001.fastq.gz",
 ]
@@ -112,14 +112,14 @@ def test_copier_str_mixed(tmp_path):
     copier.copy_files(tmp_path)
     observed = str(copier)
     expected = """
-[UpdatedFileNames]
+[CopiedFiles]
 "test1_S1_L001_R1_001.fastq.gz" = "test1_R1.fastq.gz"
 "test1_S1_L001_R2_001.fastq.gz" = "test1_R2.fastq.gz"
 "test3-reads-r1.fastq" = "test3_R1.fastq.gz"
 "test3-reads-r2.fastq" = "test3_R2.fastq.gz"
 
-[SkippedFileNames]
-already_processed = [
+[SkippedFiles]
+already_copied = [
     "test2_R1.fq.gz",
     "test2_R2.fq.gz",
 ]
@@ -138,8 +138,8 @@ def test_copier_str_roundtrip(tmp_path):
         print(copier, file=fh)
     with open(copy_log, "rb") as fh:
         copy_data = tomllib.load(fh)
-    assert len(copy_data["UpdatedFileNames"]) == 4
-    assert copy_data["UpdatedFileNames"]["test1_S1_L001_R1_001.fastq.gz"] == "test1_R1.fastq.gz"
-    observed = copy_data["SkippedFileNames"]["already_processed"]
+    assert len(copy_data["CopiedFiles"]) == 4
+    assert copy_data["CopiedFiles"]["test1_S1_L001_R1_001.fastq.gz"] == "test1_R1.fastq.gz"
+    observed = copy_data["SkippedFiles"]["already_copied"]
     expected = ["test2_R1.fq.gz", "test2_R2.fq.gz"]
     assert observed == expected
