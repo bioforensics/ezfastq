@@ -8,6 +8,7 @@
 # -------------------------------------------------------------------------------------------------
 
 from fq.map import SampleFastqMap
+from fq.pair import PairMode
 from importlib.resources import files
 import pytest
 
@@ -28,7 +29,9 @@ def test_seqmap_basic(simple_case):
 
 
 def test_seqmap_single(single_end_case):
-    seq_map = SampleFastqMap.new(["1-1", "1-2", "1-3"], single_end_case, reads_are_paired=False)
+    seq_map = SampleFastqMap.new(
+        ["1-1", "1-2", "1-3"], single_end_case, pair_mode=PairMode.SingleEnd
+    )
     assert seq_map["1-1"] == [single_end_case / "1-1_S1_L001_R1_001.fastq.gz"]
     assert "1-2" in seq_map
     assert "1-3" in seq_map
@@ -42,9 +45,9 @@ def test_sample_not_found(simple_case):
 
 
 def test_single_end_mismatch(single_end_case):
-    message = "sample 1-1: found 1 FASTQ files, expected 2 in paired-end mode"
+    message = r"sample 1-1: found 1 FASTQ file\(s\), expected 2 in paired-end mode"
     with pytest.raises(ValueError, match=message):
-        SampleFastqMap.new(["1-1", "1-2", "1-3"], single_end_case)
+        SampleFastqMap.new(["1-1", "1-2", "1-3"], single_end_case, pair_mode=PairMode.PairedEnd)
 
 
 def test_nested_sample_names():

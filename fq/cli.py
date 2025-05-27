@@ -8,6 +8,7 @@
 # -------------------------------------------------------------------------------------------------
 
 from .api import copy
+from .pair import PairMode
 from argparse import ArgumentParser
 from importlib.metadata import version
 from pathlib import Path
@@ -15,7 +16,13 @@ from pathlib import Path
 
 def main(arglist=None):
     args = parse_args(arglist)
-    copy(args.samples, args.seq_path, prefix=args.prefix, workdir=args.workdir)
+    copy(
+        args.samples,
+        args.seq_path,
+        pair_mode=args.pair_mode,
+        prefix=args.prefix,
+        workdir=args.workdir,
+    )
 
 
 def parse_args(arglist=None):
@@ -26,6 +33,7 @@ def parse_args(arglist=None):
     samples_file_exists = samples_file.is_file() or samples_file.is_fifo()
     if len(args.samples) == 1 and samples_file_exists:
         args.samples = samples_file.read_text().strip().split("\n")
+    args.pair_mode = PairMode(args.pair_mode)
     return args
 
 
@@ -60,5 +68,14 @@ def get_parser():
         metavar="P",
         default="",
         help="prefix to prepend to sample names; resulting file path will be '{workdir}/seq/{prefix}_{sample}_R{1,2}.fastq.gz'",
+    )
+    parser.add_argument(
+        "-m",
+        "--pair-mode",
+        metavar="M",
+        type=int,
+        choices=[0, 1, 2],
+        default=0,
+        help="specify 1 to indicate that all samples are single-end, or 2 to indicate that all samples are paired-end; by default, read layout is inferred automatically on a per-sample basis",
     )
     return parser
