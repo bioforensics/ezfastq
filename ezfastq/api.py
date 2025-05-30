@@ -23,3 +23,4 @@ def copy(sample_names, seq_path, pair_mode=PairMode.Unspecified, prefix="", work
     added_samples = sorted(added_samples)
     with open(workdir / "samples.txt", "a") as fh:
         print(*added_samples, sep="\n", file=fh)
+    return copier
