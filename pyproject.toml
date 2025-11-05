@@ -1,22 +1,19 @@
 [project]
 name = "ezfastq"
-version = "0.1.1"
+version = "0.1.2"
 description = "Scan directories for FASTQ files and associate with sample names"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "rich",
+    "rich_argparse",
 ]
 authors = [
     {name = "Daniel Standage", email = "daniel.standage@st.dhs.gov"},
     {name = "Ryan Berger", email = "ryan.berger@st.dhs.gov"},
 ]
 
-[build-system]
-requires = ["setuptools", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
-
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
     "black==25.1",
     "pytest",
@@ -25,6 +22,10 @@ dev = [
 
 [project.scripts]
 ezfastq = "ezfastq.cli:main"
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["ezfastq"]
