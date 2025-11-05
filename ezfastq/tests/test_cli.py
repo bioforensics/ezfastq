@@ -30,6 +30,15 @@ def test_copy(tmp_path):
     assert "SkippedFiles" not in log_data
 
 
+def test_copy_subdir(tmp_path):
+    seq_path = files("ezfastq") / "tests" / "data" / "flat"
+    arglist = [seq_path, "test1", "test2", "--workdir", tmp_path, "--subdir", "seq/PROJa/RUNb"]
+    cli.main(arglist)
+    rundir = tmp_path / "seq" / "PROJa" / "RUNb"
+    assert rundir.is_dir()
+    assert len(list(rundir.glob("*_R?.fastq.gz"))) == 4
+
+
 def test_copy_sample_names_file(tmp_path):
     sample_names_file = tmp_path / "sample-names.txt"
     sample_names_file.write_text("test1\ntest3\ntest2\n")

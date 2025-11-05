@@ -12,6 +12,7 @@ from .pair import PairMode
 from argparse import ArgumentParser
 from importlib.metadata import version
 from pathlib import Path
+from rich_argparse import RichHelpFormatter
 
 
 def main(arglist=None):
@@ -22,11 +23,12 @@ def main(arglist=None):
         pair_mode=args.pair_mode,
         prefix=args.prefix,
         workdir=args.workdir,
+        subdir=args.subdir,
     )
 
 
 def parse_args(arglist=None):
-    if arglist:
+    if arglist:  # pragma: no cover
         arglist = map(str, arglist)
     args = get_parser().parse_args(arglist)
     samples_file = Path(args.samples[0])
@@ -38,7 +40,10 @@ def parse_args(arglist=None):
 
 
 def get_parser():
-    parser = ArgumentParser(description="Copy FASTQ files and update sample names")
+    parser = ArgumentParser(
+        description="Copy FASTQ files and use sample names to make filenames consistent",
+        formatter_class=RichHelpFormatter,
+    )
     parser.add_argument(
         "seq_path",
         help="path to directory containing sequences in FASTQ format; subdirectories will be searched recursively",
@@ -57,10 +62,17 @@ def get_parser():
     parser.add_argument(
         "-w",
         "--workdir",
-        metavar="WD",
+        metavar="PATH",
         type=Path,
         default=Path("."),
-        help="directory to which input files will be copied and renamed",
+        help="project directory to which input files will be copied and renamed; current directory is used by default",
+    )
+    parser.add_argument(
+        "-s",
+        "--subdir",
+        metavar="PATH",
+        default="seq",
+        help="subdirectory path under --workdir to which sequence files will be written; PATH=`seq` by default, but can contain nesting (e.g. `seq/study`)",
     )
     parser.add_argument(
         "-p",
