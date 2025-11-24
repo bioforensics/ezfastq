@@ -9,6 +9,7 @@
 
 from ezfastq import cli
 from importlib.resources import files
+from pathlib import Path
 import pytest
 from subprocess import run
 
@@ -28,6 +29,20 @@ def test_copy(tmp_path):
         log_data = tomllib.load(fh)
     assert len(log_data["CopiedFiles"]) == 6
     assert "SkippedFiles" not in log_data
+
+
+def test_copy_verbose(tmp_path):
+    seq_path = files("ezfastq") / "tests" / "data" / "flat"
+    arglist = [seq_path, "test1", "test2", "test3", "--workdir", tmp_path, "--verbose"]
+    cli.main(arglist)
+    copy_log = tmp_path / "seq" / "copy-log-1.toml"
+    with open(copy_log, "rb") as fh:
+        log_data = tomllib.load(fh)
+    assert "Paths" in log_data
+    assert "source" in log_data["Paths"]
+    assert "destination" in log_data["Paths"]
+    assert Path(log_data["Paths"]["source"]) == seq_path
+    assert Path(log_data["Paths"]["destination"]) == tmp_path / "seq"
 
 
 def test_copy_subdir(tmp_path):

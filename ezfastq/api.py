@@ -19,13 +19,17 @@ def copy(
     prefix="",
     workdir=Path("."),
     subdir="seq",
+    verbose=False,
 ):
     copier = FastqCopier.from_dir(sample_names, seq_path, prefix=prefix, pair_mode=pair_mode)
     copier.copy_files(workdir / subdir)
     copier.print_copy_log()
     nlogs = len(list((workdir / subdir).glob("copy-log-*.toml")))
     with open(workdir / subdir / f"copy-log-{nlogs + 1}.toml", "w") as fh:
-        print(copier, file=fh)
+        log = str(copier)
+        if verbose:
+            log += f'\n[Paths]\nsource="{seq_path}"\ndestination="{workdir / subdir}"'
+        print(log, file=fh)
     added_samples = set(fastq.sample for fastq in copier.copied_files)
     added_samples = sorted(added_samples)
     with open(workdir / "samples.txt", "a") as fh:

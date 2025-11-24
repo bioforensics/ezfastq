@@ -24,6 +24,7 @@ def main(arglist=None):
         prefix=args.prefix,
         workdir=args.workdir,
         subdir=args.subdir,
+        verbose=args.verbose,
     )
 
 
@@ -89,5 +90,11 @@ def get_parser():
         choices=[0, 1, 2],
         default=0,
         help="specify 1 to indicate that all samples are single-end, or 2 to indicate that all samples are paired-end; by default, read layout is inferred automatically on a per-sample basis",
+    )
+    parser.add_argument(
+        "-V",
+        "--verbose",
+        action="store_true",
+        help="include source and destination in copy log",
     )
     return parser
