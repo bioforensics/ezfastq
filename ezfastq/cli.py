@@ -14,7 +14,8 @@ from argparse import ArgumentParser
 from importlib.metadata import version
 from pathlib import Path
 from rich.text import Text
-from rich_argparse import RichHelpFormatter
+from rich_argparse import RawDescriptionRichHelpFormatter
+from shutil import get_terminal_size
 
 
 def main(arglist=None):
@@ -45,18 +46,18 @@ def parse_args(arglist=None):
 
 
 def get_parser():
-    epilog_text = """
-Examples:
-    ezfastq /path/to/fastqs/ sample1 sample2 sample3
+    epilog = """
+[bold cyan]Examples:[/bold cyan]
+    [dim]ezfastq /path/to/fastqs/ sample1 sample2 sample3
     ezfastq /path/to/fastqs/ s1:Sample1 s2:Sample2 s3:Sample3
     ezfastq /path/to/fastqs/ samplenames.txt
     ezfastq /path/to/fastqs/ samplenames.txt --workdir /path/to/projectdir/ --subdir seq/Run01/
-    ezfastq /path/to/fastqs/ samplenames.txt --pair-mode 2
+    ezfastq /path/to/fastqs/ samplenames.txt --pair-mode 2[/dim]
 """
-    epilog = Text(epilog_text, no_wrap=True)
+    width = min(99, get_terminal_size().columns - 2)
     parser = ArgumentParser(
         description="Copy FASTQ files and use sample names to make filenames consistent",
-        formatter_class=RichHelpFormatter,
+        formatter_class=lambda prog: RawDescriptionRichHelpFormatter(prog, width=width),
         epilog=epilog,
     )
     parser.add_argument(
