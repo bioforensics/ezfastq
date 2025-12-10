@@ -10,18 +10,11 @@
 
 class NameMap(dict):
     @classmethod
-    def from_list(cls, name_list):
+    def from_arglist(cls, arg_list):
         name_map = cls()
-        for value in name_list:
-            num_fields = value.count(":")
-            if num_fields != 1 and num_fields != 2:
-                message = f"expected 1 or 2 values in sample name, not {num_fields}"
-                raise ValueError(message)
-            if num_fields == 1:
-                name_map[value] = value
-            else:
-                old_name, new_name = value.split(":")
-                name_map[old_name] = new_name
+        for argument in arg_list:
+            old_name, new_name = cls.parse_name(argument, sep=":")
+            name_map[old_name] = new_name
         return name_map
 
     @classmethod
@@ -29,16 +22,25 @@ class NameMap(dict):
         name_map = cls()
         with open(path, "r") as fh:
             for line in fh:
-                line = line.strip()
-                num_columns = line.count("\t") + 1
-                if num_columns != 1 and num_columns != 2:
-                    message = f"expected 1 or 2 columns in sample name file, not {num_columns}"
-                    raise ValueError(message)
-                if num_columns == 1:
-                    name_map[line] = line
-                else:
-                    old_name, new_name = line.split("\t")
-                    name_map[old_name] = new_name
+                old_name, new_name = cls.parse_name(line, sep="\t")
+                name_map[old_name] = new_name
         if len(name_map) == 0:
-            raise ValueError(f"sample name file {path} is empty")
+            raise ValueError(f'sample name file "{path}" is empty')
         return name_map
+
+    @staticmethod
+    def parse_name(name_string, sep=":"):
+        name_string = name_string.strip()
+        num_values = name_string.count(sep) + 1
+        if num_values != 1 and num_values != 2:
+            message = f'expected 1 or 2 values in sample name, not {num_values}: "{name_string}"'
+            raise SampleNameError(message)
+        if num_values == 1:
+            return name_string, name_string
+        else:
+            old_name, new_name = name_string.split(sep)
+            return old_name, new_name
+
+
+class SampleNameError(ValueError):
+    pass

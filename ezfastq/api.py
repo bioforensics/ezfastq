@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 def copy(
-    sample_names,
+    sample_name_map,
     seq_path,
     pair_mode=PairMode.Unspecified,
     prefix="",
@@ -21,7 +21,7 @@ def copy(
     subdir="seq",
     verbose=False,
 ):
-    copier = FastqCopier.from_dir(sample_names, seq_path, prefix=prefix, pair_mode=pair_mode)
+    copier = FastqCopier.from_dir(sample_name_map, seq_path, prefix=prefix, pair_mode=pair_mode)
     copier.copy_files(workdir / subdir)
     copier.print_copy_log()
     nlogs = len(list((workdir / subdir).glob("copy-log-*.toml")))

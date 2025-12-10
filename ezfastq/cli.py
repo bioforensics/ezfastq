@@ -8,10 +8,12 @@
 # -------------------------------------------------------------------------------------------------
 
 from .api import copy
+from .namemap import NameMap
 from .pair import PairMode
 from argparse import ArgumentParser
 from importlib.metadata import version
 from pathlib import Path
+from rich.text import Text
 from rich_argparse import RichHelpFormatter
 
 
@@ -35,15 +37,27 @@ def parse_args(arglist=None):
     samples_file = Path(args.samples[0])
     samples_file_exists = samples_file.is_file() or samples_file.is_fifo()
     if len(args.samples) == 1 and samples_file_exists:
-        args.samples = samples_file.read_text().strip().split("\n")
+        args.samples = NameMap.from_file(samples_file)
+    else:
+        args.samples = NameMap.from_arglist(args.samples)
     args.pair_mode = PairMode(args.pair_mode)
     return args
 
 
 def get_parser():
+    epilog_text = """
+Examples:
+    ezfastq /path/to/fastqs/ sample1 sample2 sample3
+    ezfastq /path/to/fastqs/ s1:Sample1 s2:Sample2 s3:Sample3
+    ezfastq /path/to/fastqs/ samplenames.txt
+    ezfastq /path/to/fastqs/ samplenames.txt --workdir /path/to/projectdir/ --subdir seq/Run01/
+    ezfastq /path/to/fastqs/ samplenames.txt --pair-mode 2
+"""
+    epilog = Text(epilog_text, no_wrap=True)
     parser = ArgumentParser(
         description="Copy FASTQ files and use sample names to make filenames consistent",
         formatter_class=RichHelpFormatter,
+        epilog=epilog,
     )
     parser.add_argument(
         "seq_path",
@@ -52,7 +66,7 @@ def get_parser():
     parser.add_argument(
         "samples",
         nargs="+",
-        help="name of one or more samples to process; can be provided as command-line arguments or as a file with one sample name per line",
+        help="name of one or more samples to process; samples can optionally be renamed by appending a colon and new name to each sample name; alternatively, sample names can be provided as a file with one sample name per line, or two tab-separated values to rename samples",
     )
     parser.add_argument(
         "-v",
