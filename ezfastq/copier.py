@@ -40,13 +40,16 @@ class FastqCopier:
     skipped_files: List
     file_map: SampleFastqMap
     prefix: str = ""
+    link: bool = False
 
     @classmethod
-    def from_dir(cls, sample_names, data_path, prefix="", pair_mode=PairMode.Unspecified):
+    def from_dir(
+        cls, sample_names, data_path, prefix="", pair_mode=PairMode.Unspecified, link=False
+    ):
         copied_files = list()
         skipped_files = list()
         file_map = SampleFastqMap.new(sample_names, data_path, pair_mode=pair_mode)
-        copier = cls(sorted(sample_names), copied_files, skipped_files, file_map, prefix)
+        copier = cls(sorted(sample_names), copied_files, skipped_files, file_map, prefix, link)
         return copier
 
     def copy_files(self, destination):
@@ -110,11 +113,13 @@ class FastqCopier:
     def __str__(self):
         output = StringIO()
         if len(self.copied_files) > 0:
-            print("[CopiedFiles]", file=output)
+            header = "[LinkedFiles]" if self.link else "[CopiedFiles]"
+            print(header, file=output)
             for fastq in self.copied_files:
                 print(fastq, file=output)
         if len(self.skipped_files) > 0:
-            print("\n[SkippedFiles]\nalready_copied = [", file=output)
+            key = "linked" if self.link else "copied"
+            print(f"\n[SkippedFiles]\nalready_{key} = [", file=output)
             for fastq in self.skipped_files:
                 print(f'    "{fastq.source_path.name}",', file=output)
             print("]", file=output)

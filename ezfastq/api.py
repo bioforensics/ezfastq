@@ -19,9 +19,12 @@ def copy(
     prefix="",
     workdir=Path("."),
     subdir="seq",
+    link=False,
     verbose=False,
 ):
-    copier = FastqCopier.from_dir(sample_names, seq_path, prefix=prefix, pair_mode=pair_mode)
+    copier = FastqCopier.from_dir(
+        sample_names, seq_path, prefix=prefix, pair_mode=pair_mode, link=link
+    )
     copier.copy_files(workdir / subdir)
     copier.print_copy_log()
     nlogs = len(list((workdir / subdir).glob("copy-log-*.toml")))

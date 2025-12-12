@@ -45,6 +45,19 @@ def test_copy_verbose(tmp_path):
     assert Path(log_data["Paths"]["destination"]) == tmp_path / "seq"
 
 
+def test_link(tmp_path):
+    seq_path = files("ezfastq") / "tests" / "data" / "flat"
+    arglist = [seq_path, "test1", "test2", "--workdir", tmp_path, "--link"]
+    cli.main(arglist)
+    assert len(list((tmp_path / "seq").glob("*_R?.fastq.gz"))) == 4
+    copy_log = tmp_path / "seq" / "copy-log-1.toml"
+    with open(copy_log, "rb") as fh:
+        log_data = tomllib.load(fh)
+    assert len(log_data["LinkedFiles"]) == 4
+    assert "CopiedFiles" not in log_data
+    assert "SkippedFiles" not in log_data
+
+
 def test_copy_subdir(tmp_path):
     seq_path = files("ezfastq") / "tests" / "data" / "flat"
     arglist = [seq_path, "test1", "test2", "--workdir", tmp_path, "--subdir", "seq/PROJa/RUNb"]

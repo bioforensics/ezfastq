@@ -43,13 +43,16 @@ def test_fastq_file_copy(tmp_path):
     assert file_copy.is_file()
 
 
-def test_fastq_file_check_and_copy(tmp_path):
+@pytest.mark.parametrize("link_mode", [True, False])
+def test_fastq_file_check_and_copy(tmp_path, link_mode):
     destination = tmp_path / "seq"
     inpath = files("ezfastq") / "tests" / "data" / "flat" / "test1_S1_L001_R2_001.fastq.gz"
     infile = FastqFile(inpath, "test1", 2)
-    was_copied = infile.check_and_copy(destination)
+    was_copied = infile.check_and_copy(destination, link=link_mode)
     assert was_copied
     file_copy = tmp_path / "seq" / "test1_R2.fastq.gz"
     assert file_copy.is_file()
-    was_copied = infile.check_and_copy(destination)
+    if link_mode is True:
+        assert file_copy.is_symlink()
+    was_copied = infile.check_and_copy(destination, link=link_mode)
     assert not was_copied
