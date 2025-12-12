@@ -8,6 +8,7 @@
 # -------------------------------------------------------------------------------------------------
 
 from dataclasses import dataclass
+from hashlib import sha256
 from pathlib import Path
 from shutil import copy
 from subprocess import run
@@ -42,6 +43,8 @@ class FastqFile:
         destination.mkdir(parents=True, exist_ok=True)
         file_copy = destination / self._working_name
         copy(self.source_path, file_copy)
+        if file_sha256(self.source_path) != file_sha256(file_copy):  # pragma: no cover
+            raise CopyError(f"checksum failed for {self.source_path}")
         if self.extension == "fastq":
             run(["gzip", str(file_copy)])
 
@@ -69,6 +72,18 @@ class FastqFile:
     @property
     def _working_name(self):
         return f"{self.stem}.{self.extension}"
+
+
+def file_sha256(path, block_size=65536):
+    sha = sha256()
+    with open(path, "rb") as fh:
+        for block in iter(lambda: fh.read(block_size), b""):
+            sha.update(block)
+    return sha.hexdigest()
+
+
+class CopyError(RuntimeError):
+    pass
 
 
 class LinkError(ValueError):
