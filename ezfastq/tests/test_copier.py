@@ -8,9 +8,11 @@
 # -------------------------------------------------------------------------------------------------
 
 from ezfastq.copier import FastqCopier
+from ezfastq.fastq import LinkError
 from ezfastq.namemap import NameMap
 from importlib.resources import files
 from itertools import product
+import pytest
 
 try:
     import tomllib
@@ -56,6 +58,31 @@ def test_copier_copy(tmp_path):
     assert len(copier3.copied_files) == 1
     assert copier3.copied_files[0].name == "test2_R2.fastq.gz"
     assert len(copier3.skipped_files) == 3
+
+
+def test_copier_link(tmp_path):
+    sample_names = NameMap.from_arglist(["test1", "test2"])
+    copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1, link=True)
+    copier.copy_files(tmp_path)
+    assert len(copier.copied_files) == 4
+    destination = tmp_path / "seq"
+    assert all(fq.is_symlink() for fq in destination.glob("*.fastq.gz"))
+    observed = str(copier)
+    expected = """
+[LinkedFiles]
+"test1_S1_L001_R1_001.fastq.gz" = "test1_R1.fastq.gz"
+"test1_S1_L001_R2_001.fastq.gz" = "test1_R2.fastq.gz"
+"test2_R1.fq.gz" = "test2_R1.fastq.gz"
+"test2_R2.fq.gz" = "test2_R2.fastq.gz"
+"""
+    assert observed.strip() == expected.strip()
+
+
+def test_copier_link_error(tmp_path):
+    sample_names = NameMap.from_arglist(["test2", "test3"])
+    copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1, link=True)
+    with pytest.raises(LinkError, match="linking only supported for gzip-compressed files"):
+        copier.copy_files(tmp_path)
 
 
 def test_copier_prefix(tmp_path):

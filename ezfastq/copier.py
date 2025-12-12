@@ -41,13 +41,16 @@ class FastqCopier:
     skipped_files: List
     file_map: SampleFastqMap
     prefix: str = ""
+    link: bool = False
 
     @classmethod
-    def from_dir(cls, sample_name_map, data_path, prefix="", pair_mode=PairMode.Unspecified):
+    def from_dir(
+        cls, sample_name_map, data_path, prefix="", pair_mode=PairMode.Unspecified, link=False
+    ):
         copied_files = list()
         skipped_files = list()
         file_map = SampleFastqMap.new(sample_name_map.keys(), data_path, pair_mode=pair_mode)
-        copier = cls(sample_name_map, copied_files, skipped_files, file_map, prefix)
+        copier = cls(sample_name_map, copied_files, skipped_files, file_map, prefix, link)
         return copier
 
     def copy_files(self, destination):
@@ -67,7 +70,7 @@ class FastqCopier:
                 else:
                     desc = f"[bold red]{fastq.sample:>16s} R{fastq.read}"
                 progress.update(task, description=desc)
-                was_copied = fastq.check_and_copy(destination)
+                was_copied = fastq.check_and_copy(destination, link=self.link)
                 progress.update(task, advance=1)
                 if was_copied:
                     self.copied_files.append(fastq)
@@ -112,11 +115,13 @@ class FastqCopier:
     def __str__(self):
         output = StringIO()
         if len(self.copied_files) > 0:
-            print("[CopiedFiles]", file=output)
+            header = "[LinkedFiles]" if self.link else "[CopiedFiles]"
+            print(header, file=output)
             for fastq in self.copied_files:
                 print(fastq, file=output)
         if len(self.skipped_files) > 0:
-            print("\n[SkippedFiles]\nalready_copied = [", file=output)
+            key = "linked" if self.link else "copied"
+            print(f"\n[SkippedFiles]\nalready_{key} = [", file=output)
             for fastq in self.skipped_files:
                 print(f'    "{fastq.source_path.name}",', file=output)
             print("]", file=output)

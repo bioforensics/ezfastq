@@ -26,11 +26,14 @@ class FastqFile:
     def __str__(self):
         return f'"{self.source_path.name}" = "{self.name}"'
 
-    def check_and_copy(self, destination):
+    def check_and_copy(self, destination, link=False):
         destination = Path(destination)
         compressed_copy = destination / self.name
         if compressed_copy.is_file():
             return False
+        elif link is True:
+            self.link(destination)
+            return True
         else:
             self.copy(destination)
             return True
@@ -41,6 +44,14 @@ class FastqFile:
         copy(self.source_path, file_copy)
         if self.extension == "fastq":
             run(["gzip", str(file_copy)])
+
+    def link(self, destination):
+        if self.extension != "fastq.gz":
+            message = "symbolic linking only supported for gzip-compressed files"
+            raise LinkError(message)
+        destination.mkdir(parents=True, exist_ok=True)
+        sym_link = destination / self._working_name
+        sym_link.symlink_to(self.source_path)
 
     @property
     def name(self):
@@ -58,3 +69,7 @@ class FastqFile:
     @property
     def _working_name(self):
         return f"{self.stem}.{self.extension}"
+
+
+class LinkError(ValueError):
+    pass
