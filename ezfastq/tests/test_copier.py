@@ -8,8 +8,9 @@
 # -------------------------------------------------------------------------------------------------
 
 from ezfastq.copier import FastqCopier
+from ezfastq.namemap import NameMap
 from importlib.resources import files
-import pytest
+from itertools import product
 
 try:
     import tomllib
@@ -22,7 +23,7 @@ SEQ_PATH_2 = files("ezfastq") / "tests" / "data" / "nested"
 
 
 def test_copier_basic():
-    sample_names = ["test1", "test2"]
+    sample_names = NameMap.from_arglist(["test1", "test2"])
     copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1)
     observed = [fqfile.source_path.name for fqfile in copier]
     expected = [
@@ -36,7 +37,7 @@ def test_copier_basic():
 
 
 def test_copier_copy(tmp_path):
-    sample_names = ["test1", "test2"]
+    sample_names = NameMap.from_arglist(["test1", "test2"])
     # First pass: copy all 4
     copier1 = FastqCopier.from_dir(sample_names, SEQ_PATH_1)
     copier1.copy_files(tmp_path)
@@ -58,14 +59,14 @@ def test_copier_copy(tmp_path):
 
 
 def test_copier_prefix(tmp_path):
-    sample_names = ["test2", "test3"]
+    sample_names = NameMap.from_arglist(["test2", "test3"])
     copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1, prefix="abc_")
     copier.copy_files(tmp_path)
     assert len(list(tmp_path.glob("abc_*.fastq.gz"))) == 4
 
 
 def test_copier_str_basic(tmp_path):
-    sample_names = ["test1", "test2", "test3"]
+    sample_names = NameMap.from_arglist(["test1", "test2", "test3"])
     copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1)
     copier.copy_files(tmp_path)
     observed = str(copier)
@@ -81,14 +82,14 @@ def test_copier_str_basic(tmp_path):
     assert observed.strip() == expected.strip()
 
 
-def test_copier_str_noop(tmp_path):
-    sample_names = ["test1", "test2", "test3"]
+def test_copier_str_noop():
+    sample_names = NameMap.from_arglist(["test1", "test2", "test3"])
     copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1)
     assert str(copier) == ""
 
 
 def test_copier_str_allskip(tmp_path):
-    sample_names = ["test1"]
+    sample_names = NameMap.from_arglist(["test1"])
     copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1)
     (tmp_path / "test1_R1.fastq.gz").touch()
     (tmp_path / "test1_R2.fastq.gz").touch()
@@ -105,7 +106,7 @@ already_copied = [
 
 
 def test_copier_str_mixed(tmp_path):
-    sample_names = ["test1", "test2", "test3"]
+    sample_names = NameMap.from_arglist(["test1", "test2", "test3"])
     copier = FastqCopier.from_dir(sample_names, SEQ_PATH_2)
     (tmp_path / "test2_R1.fastq.gz").touch()
     (tmp_path / "test2_R2.fastq.gz").touch()
@@ -128,7 +129,7 @@ already_copied = [
 
 
 def test_copier_str_roundtrip(tmp_path):
-    sample_names = ["test1", "test2", "test3"]
+    sample_names = NameMap.from_arglist(["test1", "test2", "test3"])
     copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1)
     (tmp_path / "test2_R1.fastq.gz").touch()
     (tmp_path / "test2_R2.fastq.gz").touch()
@@ -143,3 +144,26 @@ def test_copier_str_roundtrip(tmp_path):
     observed = copy_data["SkippedFiles"]["already_copied"]
     expected = ["test2_R1.fq.gz", "test2_R2.fq.gz"]
     assert observed == expected
+
+
+def test_copier_with_renaming(tmp_path):
+    sample_names = NameMap.from_arglist(
+        ["test1:TestSampleA", "test2:TestSampleB", "test3:TestSampleC"]
+    )
+    copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1)
+    copier.copy_files(tmp_path)
+    observed = str(copier)
+    for sample, end in product("ABC", "12"):
+        fastq = tmp_path / f"TestSample{sample}_R{end}.fastq.gz"
+        assert fastq.is_file()
+    print(observed)
+    expected = """
+[CopiedFiles]
+"test1_S1_L001_R1_001.fastq.gz" = "TestSampleA_R1.fastq.gz"
+"test1_S1_L001_R2_001.fastq.gz" = "TestSampleA_R2.fastq.gz"
+"test2_R1.fq.gz" = "TestSampleB_R1.fastq.gz"
+"test2_R2.fq.gz" = "TestSampleB_R2.fastq.gz"
+"test3-reads-r1.fastq" = "TestSampleC_R1.fastq.gz"
+"test3-reads-r2.fastq" = "TestSampleC_R2.fastq.gz"
+"""
+    assert observed.strip() == expected.strip()
