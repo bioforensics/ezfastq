@@ -9,6 +9,7 @@
 
 from .fastq import FastqFile
 from .map import SampleFastqMap
+from .namemap import NameMap
 from .pair import PairMode
 from dataclasses import dataclass
 from io import StringIO
@@ -35,7 +36,7 @@ class FastqCopier:
     FASTQ file names are streamlined in the process, and read pairing status is validated.
     """
 
-    sample_names: List
+    sample_name_map: NameMap
     copied_files: List
     skipped_files: List
     file_map: SampleFastqMap
@@ -44,12 +45,12 @@ class FastqCopier:
 
     @classmethod
     def from_dir(
-        cls, sample_names, data_path, prefix="", pair_mode=PairMode.Unspecified, link=False
+        cls, sample_name_map, data_path, prefix="", pair_mode=PairMode.Unspecified, link=False
     ):
         copied_files = list()
         skipped_files = list()
-        file_map = SampleFastqMap.new(sample_names, data_path, pair_mode=pair_mode)
-        copier = cls(sorted(sample_names), copied_files, skipped_files, file_map, prefix, link)
+        file_map = SampleFastqMap.new(sample_name_map.keys(), data_path, pair_mode=pair_mode)
+        copier = cls(sample_name_map, copied_files, skipped_files, file_map, prefix, link)
         return copier
 
     def copy_files(self, destination):
@@ -98,7 +99,7 @@ class FastqCopier:
 
     @property
     def length_longest_sample_name(self):
-        return max(len(sample) for sample in self.sample_names)
+        return max(len(sample) for sample in self.sample_name_map.keys())
 
     def __len__(self):
         return sum(len(fqfiles) for fqfiles in self.file_map.values())
@@ -108,7 +109,8 @@ class FastqCopier:
             for n, fqfile in enumerate(fqfiles, 1):
                 source_path = Path(fqfile).absolute()
                 read = 0 if len(fqfiles) == 1 else n
-                yield FastqFile(source_path, sample_name, read, self.prefix)
+                new_name = self.sample_name_map[sample_name]
+                yield FastqFile(source_path, new_name, read, self.prefix)
 
     def __str__(self):
         output = StringIO()
