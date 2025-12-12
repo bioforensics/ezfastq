@@ -69,7 +69,7 @@ class FastqCopier:
                 else:
                     desc = f"[bold red]{fastq.sample:>16s} R{fastq.read}"
                 progress.update(task, description=desc)
-                was_copied = fastq.check_and_copy(destination)
+                was_copied = fastq.check_and_copy(destination, link=self.link)
                 progress.update(task, advance=1)
                 if was_copied:
                     self.copied_files.append(fastq)

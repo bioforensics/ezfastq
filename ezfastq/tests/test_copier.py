@@ -8,6 +8,7 @@
 # -------------------------------------------------------------------------------------------------
 
 from ezfastq.copier import FastqCopier
+from ezfastq.fastq import LinkError
 from importlib.resources import files
 import pytest
 
@@ -73,6 +74,13 @@ def test_copier_link(tmp_path):
 "test2_R2.fq.gz" = "test2_R2.fastq.gz"
 """
     assert observed.strip() == expected.strip()
+
+
+def test_copier_link_error(tmp_path):
+    sample_names = ["test2", "test3"]
+    copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1, link=True)
+    with pytest.raises(LinkError, match="linking only supported for gzip-compressed files"):
+        copier.copy_files(tmp_path)
 
 
 def test_copier_prefix(tmp_path):
