@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Support for renaming samples while copying (#6)
 - Support for symbolic linking instead of copying (#9)
+- SHA256 checksums to ensure integrity of copied files (#10)
 
 
 ## [0.1.3] 2025-12-03
