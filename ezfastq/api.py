@@ -35,6 +35,7 @@ def copy(
         print(log, file=fh)
     added_samples = set(fastq.sample for fastq in copier.copied_files)
     added_samples = sorted(added_samples)
-    with open(workdir / "samples.txt", "a") as fh:
-        print(*added_samples, sep="\n", file=fh)
+    if len(added_samples) > 0:
+        with open(workdir / "samples.txt", "a") as fh:
+            print(*added_samples, sep="\n", file=fh)
     return copier
