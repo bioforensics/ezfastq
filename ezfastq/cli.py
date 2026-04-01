@@ -29,6 +29,7 @@ def main(arglist=None):
         subdir=args.subdir,
         link=args.link,
         verbose=args.verbose,
+        excl_pattern=args.exclude,
     )
 
 
@@ -112,6 +113,14 @@ def get_parser():
         "--link",
         action="store_true",
         help="symbolically link files rather than copying; only supported for gzip-compressed files",
+    )
+    parser.add_argument(
+        "-x",
+        "--exclude",
+        metavar="REGEX",
+        type=str,
+        default=None,
+        help="skip copying FASTQ files containing the given substring",
     )
     parser.add_argument(
         "-V",

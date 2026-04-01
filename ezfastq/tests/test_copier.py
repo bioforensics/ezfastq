@@ -85,6 +85,13 @@ def test_copier_link_error(tmp_path):
         copier.copy_files(tmp_path)
 
 
+def test_copier_exclusion(tmp_path):
+    sample_names = NameMap.from_arglist(["test1", "test2"])
+    copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1, link=True, excl_pattern="R2")
+    copier.copy_files(tmp_path)
+    assert len(list(tmp_path.glob("*.fastq.gz"))) == 2
+
+
 def test_copier_prefix(tmp_path):
     sample_names = NameMap.from_arglist(["test2", "test3"])
     copier = FastqCopier.from_dir(sample_names, SEQ_PATH_1, prefix="abc_")

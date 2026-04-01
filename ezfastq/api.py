@@ -21,9 +21,15 @@ def copy(
     subdir="seq",
     link=False,
     verbose=False,
+    excl_pattern=None,
 ):
     copier = FastqCopier.from_dir(
-        sample_name_map, seq_path, prefix=prefix, pair_mode=pair_mode, link=link
+        sample_name_map,
+        seq_path,
+        prefix=prefix,
+        pair_mode=pair_mode,
+        link=link,
+        excl_pattern=excl_pattern,
     )
     copier.copy_files(workdir / subdir)
     copier.print_copy_log()
