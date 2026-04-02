@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
-- Fixed bug where `samples.txt` would have extraneous empty lines if `ezfastq` was run multiple times with the same samples (#12)
+- Fixed bug involving reading and writing empty lines from `samples.txt` file (#12)
 
 ## [0.2] 2025-12-15
 

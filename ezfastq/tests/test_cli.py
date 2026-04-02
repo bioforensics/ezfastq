@@ -67,9 +67,10 @@ def test_copy_subdir(tmp_path):
     assert len(list(rundir.glob("*_R?.fastq.gz"))) == 4
 
 
-def test_copy_sample_names_file(tmp_path):
+@pytest.mark.parametrize("samples", ["test1\ntest3\ntest2\n", "test1\ntest3\ntest2\n\n\n\n"])
+def test_copy_sample_names_file(samples, tmp_path):
     sample_names_file = tmp_path / "sample-names.txt"
-    sample_names_file.write_text("test1\ntest3\ntest2\n")
+    sample_names_file.write_text(samples)
     seq_path = files("ezfastq") / "tests" / "data" / "nested"
     arglist = [seq_path, sample_names_file, "--workdir", tmp_path]
     cli.main(arglist)
