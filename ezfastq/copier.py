@@ -112,7 +112,7 @@ class FastqCopier:
         return max(len(sample) for sample in self.sample_name_map.keys())
 
     def __len__(self):
-        return sum(len(fqfiles) for fqfiles in self.file_map.values())
+        return len([fastq for fastq in self])
 
     def __iter__(self):
         for sample_name, fqfiles in sorted(self.file_map.items()):

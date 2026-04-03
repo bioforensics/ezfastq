@@ -13,7 +13,6 @@ from .pair import PairMode
 from argparse import ArgumentParser
 from importlib.metadata import version
 from pathlib import Path
-from rich.text import Text
 from rich_argparse import RawDescriptionRichHelpFormatter
 from shutil import get_terminal_size
 
@@ -54,7 +53,8 @@ def get_parser():
     ezfastq /path/to/fastqs/ s1:Sample1 s2:Sample2 s3:Sample3
     ezfastq /path/to/fastqs/ samplenames.txt
     ezfastq /path/to/fastqs/ samplenames.txt --workdir /path/to/projectdir/ --subdir seq/Run01/
-    ezfastq /path/to/fastqs/ samplenames.txt --pair-mode 2[/dim]
+    ezfastq /path/to/fastqs/ samplenames.txt --pair-mode 2
+    ezfastq /path/to/fastqs/ samplenames.txt --exclude '\\[r,R]2'[/dim]
 """
     width = min(99, get_terminal_size().columns - 2)
     parser = ArgumentParser(
