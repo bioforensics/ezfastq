@@ -22,8 +22,9 @@ class NameMap(dict):
         name_map = cls()
         with open(path, "r") as fh:
             for line in fh:
-                old_name, new_name = cls.parse_name(line, sep="\t")
-                name_map[old_name] = new_name
+                if line.strip():
+                    old_name, new_name = cls.parse_name(line, sep="\t")
+                    name_map[old_name] = new_name
         if len(name_map) == 0:
             raise ValueError(f'sample name file "{path}" is empty')
         return name_map
