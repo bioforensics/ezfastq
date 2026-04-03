@@ -24,9 +24,10 @@ from rich.progress import (
     TimeElapsedColumn,
     TimeRemainingColumn,
 )
+import re
 from rich.syntax import Syntax
 import sys
-from typing import List
+from typing import List, Optional
 
 
 @dataclass
@@ -42,15 +43,24 @@ class FastqCopier:
     file_map: SampleFastqMap
     prefix: str = ""
     link: bool = False
+    excl_pattern: Optional[str] = None
 
     @classmethod
     def from_dir(
-        cls, sample_name_map, data_path, prefix="", pair_mode=PairMode.Unspecified, link=False
+        cls,
+        sample_name_map,
+        data_path,
+        prefix="",
+        pair_mode=PairMode.Unspecified,
+        link=False,
+        excl_pattern=None,
     ):
         copied_files = list()
         skipped_files = list()
         file_map = SampleFastqMap.new(sample_name_map.keys(), data_path, pair_mode=pair_mode)
-        copier = cls(sample_name_map, copied_files, skipped_files, file_map, prefix, link)
+        copier = cls(
+            sample_name_map, copied_files, skipped_files, file_map, prefix, link, excl_pattern
+        )
         return copier
 
     def copy_files(self, destination):
@@ -102,12 +112,14 @@ class FastqCopier:
         return max(len(sample) for sample in self.sample_name_map.keys())
 
     def __len__(self):
-        return sum(len(fqfiles) for fqfiles in self.file_map.values())
+        return len([fastq for fastq in self])
 
     def __iter__(self):
         for sample_name, fqfiles in sorted(self.file_map.items()):
             for n, fqfile in enumerate(fqfiles, 1):
                 source_path = Path(fqfile).absolute()
+                if self.excl_pattern and re.search(self.excl_pattern, source_path.name):
+                    continue
                 read = 0 if len(fqfiles) == 1 else n
                 new_name = self.sample_name_map[sample_name]
                 yield FastqFile(source_path, new_name, read, self.prefix)

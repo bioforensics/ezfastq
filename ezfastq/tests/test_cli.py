@@ -58,6 +58,14 @@ def test_link(tmp_path):
     assert "SkippedFiles" not in log_data
 
 
+def test_exclusion(tmp_path):
+    seq_path = files("ezfastq") / "tests" / "data" / "flat"
+    arglist = [seq_path, "test1", "test2", "--workdir", tmp_path, "--link", "--exclude", "R2"]
+    cli.main(arglist)
+    assert len(list((tmp_path / "seq").glob("*_R1.fastq.gz"))) == 2
+    assert len(list((tmp_path / "seq").glob("*_R2.fastq.gz"))) == 0
+
+
 def test_copy_subdir(tmp_path):
     seq_path = files("ezfastq") / "tests" / "data" / "flat"
     arglist = [seq_path, "test1", "test2", "--workdir", tmp_path, "--subdir", "seq/PROJa/RUNb"]

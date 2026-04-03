@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed bug involving reading and writing empty lines from `samples.txt` file (#12)
 
+## [0.3] 2026-04-01
+
+### Added
+- Support for skipping copying for FASTQ files matching a user-specified pattern (#11)
+
+
 ## [0.2] 2025-12-15
 
 ### Added
