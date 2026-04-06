@@ -1,6 +1,6 @@
 [project]
 name = "ezfastq"
-version = "0.3"
+version = "0.3.1.dev"
 description = "Scan directories for FASTQ files and associate with sample names"
 readme = "README.md"
 requires-python = ">=3.10"
